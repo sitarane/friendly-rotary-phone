@@ -1,20 +1,43 @@
-parties = input("How many people: ")
+parties = int(input("How many people: "))
 
-#Create a list of money spent
-spent = []
-for i in range(parties):
-	spent.append(float(input("Total spent by that guy: ")))
+everyone = []
 
-#Create a payback list
-result = []
-for k in range(parties):
-	result.append(spent[k] - ( sum(spent) / parties ))
+for party in range(parties):
+	everyone.append({"Name": input("Name #%d: " % (party + 1))})
 
-# Show the results
-for l in range(parties):
-	if result[l] > 0:
-		print "Whoever spend %d gets %d from the leeches" % (spent[l], result[l])
-	elif result[l] == 0:	
-		print "Whoever spend %d can go home now" % spent[l]
+# Total spent
+
+for someone in range(len(everyone)):
+	everyone[someone]["Spent"] = float(input("Amount spent by %s: " % everyone[someone]["Name"]))
+
+print("Spendlist:", everyone)
+
+total = 0
+for someone in range(len(everyone)):
+	total += everyone[someone]["Spent"]
+
+print("You guys spent a total of", total)
+
+# Fill in the money owed
+
+for someone in range(len(everyone)):
+	everyone[someone]["Gets"] = everyone[someone]["Spent"] - ( total / parties )
+
+# Sort by debt
+
+everyone.sort(key=lambda item: item.get("Gets"))
+
+# Biggest with biggest. Substact. Repeat.
+
+while everyone[0]["Gets"] != 0:
+	max_debit = everyone[0]["Gets"] # Negative number
+	max_credit = everyone[len(everyone) - 1]["Gets"]
+	diff = max_debit + max_credit
+	print(everyone[0]["Name"], "pays", max(abs(max_credit), abs(max_debit)), "to", everyone[len(everyone) - 1]["Name"])
+	if diff >= 0: # Reduce max_debit/credit of what's been paid
+		everyone[0]["Gets"] = 0
+		everyone[len(everyone) - 1]["Gets"] = diff
 	else:
-		print "Whoever spend %d pays %d to the capitalist pigs" % (spent[l], result[l] * -1)
+		everyone[0]["Gets"] = diff
+		everyone[len(everyone) - 1]["Gets"] = 0
+	everyone.sort(key=lambda item: item.get("Gets")) # resort so we get new max candidates next iteration
